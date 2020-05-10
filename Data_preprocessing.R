@@ -69,8 +69,7 @@ data$PREGNANCY_STATUS <- recode(data$PREGNANCY_STATUS, `2` = 1)
 data$PREGNANCY_STATUS <- as.logical(data$PREGNANCY_STATUS)
 
 # write processed data to new file
-write.csv(data, file = "processedData.csv", row.names = FALSE,
-          sep = ",", col.names = TRUE)
+data.table::fwrite(data, "processedData.csv", row.names = F, sep = ",")
 
 # split SNOMED codes
 #data$SNOMED <- str_split(data$PATIENT_PROBLEM_HISTORY, "\\|")
