@@ -9,18 +9,24 @@ print("Before cleaning")
 str(ERdata)
 
 # clean and transform  variables
-library(dplyr)
+library(tidyverse)
 
 avg.age <- mean(ERdata$AGE, na.rm = T)
 ERdata$AGE <- replace_na(ERdata$AGE, avg.age)
 
 ERdata$GENDER <- replace_na(ERdata$GENDER,"Unknown")
-gender = as.factor(ERdata$GENDER)
+ERdata$GENDER <- as.factor(ERdata$GENDER)
 
 ERdata$TRIAGE_CATEGORY <- replace_na(ERdata$TRIAGE_CATEGORY,5)
 ERdata$TRIAGE_CATEGORY <- as.factor(ERdata$TRIAGE_CATEGORY)
 
 ERdata$HOSPITAL <- as.factor(ERdata$HOSPITAL)
+
+ERdata$SMOKING_STATUS <- replace_na(ERdata$SMOKING_STATUS,FALSE)
+ERdata$SMOKING_STATUS <- as.factor(ERdata$SMOKING_STATUS)
+
+ERdata$PREGNANCY_STATUS <- replace_na(ERdata$PREGNANCY_STATUS,FALSE)
+ERdata$PREGNANCY_STATUS <- as.factor(ERdata$PREGNANCY_STATUS)
 
 ERdata$MODEL_OF_CARE <- replace_na(ERdata$MODEL_OF_CARE,"Unknown")
 ERdata$MODEL_OF_CARE <- as.factor(ERdata$MODEL_OF_CARE)
@@ -111,7 +117,6 @@ svmdata <- select(ERdata,
                   TRIAGE_CATEGORY,
                   AGE,
                   GENDER,
-                  HOSPITAL,
                   PATIENT_WEIGHT,
                   PATIENT_HEIGHT,
                   PREGNANCY_STATUS,
@@ -143,6 +148,8 @@ svmdata <- select(ERdata,
                   TEMP_TYMP_2,
                   RECENT_SURGERY_WITHIN_30_DAY)
 
+str(svmdata)
+
 # split train and test data
 # https://rpubs.com/ID_Tech/S1
 
@@ -158,13 +165,15 @@ testdata = subset(svmdata, sample=FALSE)
 print("Run SVM")
 library(e1071)
 # scale variables
-svmmodel = svm(traindata$TRIAGE_CATEGORY ~ ., data = traindata, scale = TRUE, kernel = "radial", cost = 5)
+svmmodel = svm(traindata$TRIAGE_CATEGORY ~ ., data = traindata, scale = F, 
+               kernel = "radial", cost = 5)
 print(svmmodel)
 summary(svmmodel)
 
 # test
+print("predict")
 pred <- predict(svmmodel, testdata, decision.values = TRUE)
 
 # accuracy
-table(pred, triage.category)
+print("check")
 
