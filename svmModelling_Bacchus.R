@@ -1,5 +1,6 @@
 #SVM analysis by Bacchus Beale
 
+
 # https://www.datacamp.com/community/tutorials/support-vector-machines-r
 csvfile <- "processedData.csv"
 chunksize <- 1000
@@ -176,4 +177,5 @@ pred <- predict(svmmodel, testdata, decision.values = TRUE)
 
 # accuracy
 print("check")
+
 
