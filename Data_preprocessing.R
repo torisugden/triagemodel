@@ -68,8 +68,14 @@ data$PREGNANCY_STATUS <- recode(data$PREGNANCY_STATUS, `2` = 1)
 # convert Pregnancy Status to binary
 data$PREGNANCY_STATUS <- as.logical(data$PREGNANCY_STATUS)
 
+# create uniqueID
+data <- data %>% mutate(ID = paste(PATIENT_ID, TRIAGE_DT_TM, sep = '_'))
+# check distinct
+n_distinct(data$ID, na.rm = FALSE)
+
 # write processed data to new file
 data.table::fwrite(data, "processedData.csv", row.names = F, sep = ",")
+
 
 # split SNOMED codes
 #data$SNOMED <- str_split(data$PATIENT_PROBLEM_HISTORY, "\\|")
