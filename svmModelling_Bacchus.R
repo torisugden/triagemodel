@@ -1,5 +1,6 @@
 #SVM analysis by Bacchus Beale
 
+
 # https://www.datacamp.com/community/tutorials/support-vector-machines-r
 csvfile <- "processedData.csv"
 chunksize <- 1000
@@ -210,3 +211,4 @@ print("errors")
 
 correctRate = sum(svm.pred==svmdata$TRIAGE_CATEGORY)/length(svmdata$TRIAGE_CATEGORY)
 misRate=1-correctRate
+
