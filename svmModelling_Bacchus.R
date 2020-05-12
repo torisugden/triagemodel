@@ -3,6 +3,8 @@
 # https://www.datacamp.com/community/tutorials/support-vector-machines-r
 csvfile <- "processedData.csv"
 chunksize <- 1000
+svmkernel <- "linear"
+
 ERdata <- read.csv(csvfile, header = T, sep = ",",nrows = chunksize)
 
 print("Before cleaning")
@@ -165,15 +167,46 @@ testdata = subset(svmdata, sample=FALSE)
 print("Run SVM")
 library(e1071)
 # scale variables
-svmmodel = svm(traindata$TRIAGE_CATEGORY ~ ., data = traindata, scale = F, 
-               kernel = "radial", cost = 5)
+svmmodel = svm(traindata$TRIAGE_CATEGORY ~ ., data = traindata, 
+               scale = F, type="C-classification", 
+               kernel = svmkernel, cost = 5, probability = TRUE)
+
+print("svm model output")
 print(svmmodel)
+print("svm model summary")
 summary(svmmodel)
+
+#print vectors
+print("support vectors")
+supportvectors <- svmmodel$index
 
 # test
 print("predict")
-pred <- predict(svmmodel, testdata, decision.values = TRUE)
+svm.pred <- predict(svmmodel, testdata, decision.values = TRUE, probability = TRUE)
 
 # accuracy
 print("check")
+values <- attr(svm.pred, "decision.values")
+probs <- attr(svm.pred, "probabilities")
 
+# Cross-validation of Cost
+# https://rstudio-pubs-static.s3.amazonaws.com/271792_96b51b7fa2af4b3f808d04f3f3051516.html
+print("tune")
+set.seed (1234)
+tune.out=tune(svmmodel ,traindata$TRIAGE_CATEGORY ~ .,data=svmdata ,kernel =svmkernel, 
+              ranges =list(cost=c(0.001,0.01,0.1, 1,5,10,100)))
+
+print(tune.out)
+
+print("best model")
+print(tune.out$bestmod)
+
+#table
+print("table")
+table(pred = svm.pred, true = svmdata$TRIAGE_CATEGORY)
+
+# errors
+print("errors")
+
+correctRate = sum(svm.pred==svmdata$TRIAGE_CATEGORY)/length(svmdata$TRIAGE_CATEGORY)
+misRate=1-correctRate
