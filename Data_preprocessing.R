@@ -4,8 +4,10 @@ library(lubridate)
 library(reshape2)
 
 #### load data ####
-temp <- tempfile(fileext = ".xlsx")
-download.file("https://jcudata.s3-ap-southeast-2.amazonaws.com/ED_Patients_Data.xlsx",temp)
+#temp <- tempfile(fileext = ".xlsx")
+#download.file("https://jcudata.s3-ap-southeast-2.amazonaws.com/ED_Patients_Data.xlsx",temp)
+# could not open zip file of xlsx
+temp = "ED_patients_Data.xlsx"
 data <- as.data.frame(read_excel(temp))
 
 # review missing values
@@ -65,6 +67,15 @@ data$SMOKING_STATUS <- as.logical(data$SMOKING_STATUS)
 data$PREGNANCY_STATUS <- recode(data$PREGNANCY_STATUS, `2` = 1)
 # convert Pregnancy Status to binary
 data$PREGNANCY_STATUS <- as.logical(data$PREGNANCY_STATUS)
+
+
+# create uniqueID
+data <- data %>% mutate(ID = paste(PATIENT_ID, TRIAGE_DT_TM, sep = '_'))
+# check distinct
+n_distinct(data$ID, na.rm = FALSE)
+
+# write processed data to new file
+data.table::fwrite(data, "processedData.csv", row.names = F, sep = ",")
 
 
 # split SNOMED codes
