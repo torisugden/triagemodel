@@ -1,10 +1,9 @@
 #SVM analysis by Bacchus Beale
 
-
 # https://www.datacamp.com/community/tutorials/support-vector-machines-r
 csvfile <- "processedData.csv"
-chunksize <- 1000
-svmkernel <- "polynomial"
+chunksize <- 10000
+svmkernel <- "radial"
 
 ERdata <- read.csv(csvfile, header = T, sep = ",",nrows = chunksize)
 
@@ -72,9 +71,9 @@ avgheart2 <- mean(ERdata$HEART_RATE_2, na.rm = T)
 ERdata$HEART_RATE_2 <- replace_na(ERdata$HEART_RATE_2,avgheart2)
 
 avgsbp1 = mean(ERdata$SBP_1, na.rm = T)
-replace_na(ERdata$SBP_1,avgsbp1)
+ERdata$SBP_1 <- replace_na(ERdata$SBP_1,avgsbp1)
 avgsbp2 = mean(ERdata$SBP_2, na.rm = T)
-replace_na(ERdata$SBP_2,avgsbp2)
+ERdata$SBP_2 <- replace_na(ERdata$SBP_2,avgsbp2)
 
 avgdbp1 <- mean(ERdata$DBP_1, na.rm = T)
 ERdata$DBP_1 <- replace_na(ERdata$DBP_1,avgdbp1)
@@ -148,8 +147,7 @@ svmdata <- select(ERdata,
                   TEMP_ORAL_1,
                   TEMP_ORAL_2,
                   TEMP_TYMP_1,
-                  TEMP_TYMP_2,
-                  RECENT_SURGERY_WITHIN_30_DAY)
+                  TEMP_TYMP_2)
 
 str(svmdata)
 
@@ -180,10 +178,12 @@ summary(svmmodel)
 #print vectors
 print("support vectors")
 supportvectors <- svmmodel$index
+print(supportvectors)
 
 # test
 print("predict")
 svm.pred <- predict(svmmodel, testdata, decision.values = TRUE, probability = TRUE)
+print(svm.pred)
 
 # accuracy
 print("check")
@@ -202,20 +202,15 @@ cat("correctRate: ", correctRate, "\n")
 cat("misRate: ", misRate, "\n")
 
 #table
-# print("table")
+print("table")
 # error must be same size: TO BE FIXED
-#table(pred = svm.pred, true = testdata$TRIAGE_CATEGORY)
+truthtable <- table(prediction = svm.pred, truth = testdata$TRIAGE_CATEGORY)
+print(truthtable)
 
-# Cross-validation of Cost
-# https://rstudio-pubs-static.s3.amazonaws.com/271792_96b51b7fa2af4b3f808d04f3f3051516.html
+#save model
+# https://www.mydatahack.com/how-to-save-machine-learning-models-in-r/
+save(svmmodel, file = "model_svm.rda")
 
-### NEED TO FIX ######
-# print("tune")
-# set.seed (1234)
-# tune.out=tune(svmmodel ,traindata$TRIAGE_CATEGORY ~ .,data=traindata ,kernel=svmkernel, 
-#               ranges =list(cost=c(0.001,0.01,0.1, 1,5,10,100)))
-# 
-# print("tune.out: ", tune.out)
-# 
-# print("best model")
-# print(tune.out$bestmod)
+# load model
+# load(file = "/tmp/model_nnet.rda")
+# model2 <- readRDS("/tmp/model_nnet2.rda")
